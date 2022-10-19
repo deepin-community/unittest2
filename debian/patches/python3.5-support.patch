@@ -1,0 +1,21 @@
+Description: Fix string match for python3.5 support
+ unittest2 (1.1.0-6.1) unstable; urgency=medium
+ .
+   * Non-maintainer upload.
+   * Fix failing string match in unit tests for attribute error
+     exceptions with python3.5. (Closes: #802361)
+Author: Neil Williams <codehelp@debian.org>
+Bug-Debian: https://bugs.debian.org/802361
+
+--- unittest2-1.1.0.orig/unittest2/test/test_loader.py
++++ unittest2-1.1.0/unittest2/test/test_loader.py
+@@ -426,7 +426,8 @@ class Test_TestLoader(unittest2.TestCase
+         except self.failureException:
+             self._check_module_lookup_error(
+                 error, test, AttributeError,
+-                "module '%s' has no attribute '%s'" % (name, regex), attr, regex)
++                "module '%s' has no attribute '%s'" % (
++                    name, regex.replace('\\', '')), attr, regex)
+ 
+     def check_module_import_error(self, error, test, attr='sdasfasfasdf', regex='(unittest2)?sdasfasfasdf'):
+         try:

@@ -1,0 +1,3 @@
+drop-argparse.patch
+python3.5-support.patch
+python3.10-support.patch

@@ -1,0 +1,28 @@
+From 18d3ea4fd054b92e45466332305d1c844bec78c0 Mon Sep 17 00:00:00 2001
+From: James Page <james.page@ubuntu.com>
+Date: Thu, 8 Oct 2015 14:20:16 -0700
+Subject: Drop requirement for argparse
+
+ Ubuntu and Debian both ship minimum python versions that include
+ argparse; drop this from REQUIRES as its breaks the py3 unit tests
+Forwarded: not-needed
+Last-Update: 2015-07-09
+
+Patch-Name: drop-argparse.patch
+---
+ setup.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/setup.py b/setup.py
+index 416afbe..00e51ca 100755
+--- a/setup.py
++++ b/setup.py
+@@ -57,7 +57,7 @@ KEYWORDS = "unittest testing tests".split(' ')
+ # Both install and setup requires - because we read VERSION from within the
+ # package, and the package also exports all the APIs.
+ # six for compat helpers
+-REQUIRES = ['argparse', 'six>=1.4', 'traceback2'],
++REQUIRES = ['six>=1.4', 'traceback2'],
+ 
+ params = dict(
+     name=NAME,

@@ -1,0 +1,17 @@
+Description: Fix collections call for python 3.10 support
+Author: Athos Ribeiro <athos.ribeiro@canonical.com>
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=998473
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/unittest2/+bug/1949778
+Last-Update: 2021-11-09
+
+--- a/unittest2/compatibility.py
++++ b/unittest2/compatibility.py
+@@ -140,7 +140,7 @@
+ ###  ChainMap (helper for configparser and string.Template)
+ ########################################################################
+ 
+-class ChainMap(collections.MutableMapping):
++class ChainMap(collections.abc.MutableMapping):
+     ''' A ChainMap groups multiple dicts (or other mappings) together
+     to create a single, updateable view.
+ 
