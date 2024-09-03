@@ -11,12 +11,8 @@ Build-Depends:
  python3-all,
  python3-setuptools,
 Build-Depends-Indep:
- python3-linecache2 <!nocheck>,
  python3-pkg-resources <!nocheck>,
- python3-six <!nocheck>,
- python3-traceback2 <!nocheck>,
 Standards-Version: 3.9.6
-XS-Python-Version: all
 Homepage: https://pypi.python.org/pypi/unittest2
 Vcs-Git: https://salsa.debian.org/python-team/packages/unittest2.git
 Vcs-Browser: https://salsa.debian.org/python-team/packages/unittest2
@@ -24,10 +20,7 @@ Vcs-Browser: https://salsa.debian.org/python-team/packages/unittest2
 Package: python3-unittest2
 Architecture: all
 Depends:
- python3-linecache2,
  python3-pkg-resources,
- python3-six,
- python3-traceback2,
  ${misc:Depends},
  ${python3:Depends},
 Description: backport of the enhanced unittest testing framework - Python 3.x

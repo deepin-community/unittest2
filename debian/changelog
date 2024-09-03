@@ -1,3 +1,27 @@
+unittest2 (1.1.0-11) unstable; urgency=medium
+
+  * Team upload.
+  * remove dependency on python3-six to help find undeclared
+    dependencies on python3-six in _other_ packages
+  * lintian: unknown-field
+  * missing manpage: fix python2 > 3 transition
+
+ -- Alexandre Detiste <tchet@debian.org>  Wed, 10 Jan 2024 13:39:26 +0100
+
+unittest2 (1.1.0-10) unstable; urgency=medium
+
+  * Add use-raw-strings-to-avoid-warnings.patch.
+
+ -- Thomas Goirand <zigo@debian.org>  Sun, 07 Jan 2024 12:43:58 +0100
+
+unittest2 (1.1.0-9) unstable; urgency=medium
+
+  * Add remove-traceback2-requirement.patch so we can get rid of the
+    traceback2 package. Removed runtime and build depends of both the
+    linecache2 and traceback2 packages.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 29 Dec 2021 14:14:12 +0100
+
 unittest2 (1.1.0-8) unstable; urgency=medium
 
   * Team upload.

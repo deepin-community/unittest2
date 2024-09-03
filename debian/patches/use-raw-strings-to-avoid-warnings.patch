@@ -1,0 +1,84 @@
+Description: Use raw strings to avoid warnings
+Author: Thomas Goirand <zigo@debian.org>
+Forwarded: no
+Last-Update: 2024-01-07
+
+--- unittest2-1.1.0.orig/unittest2/test/test_assertions.py
++++ unittest2-1.1.0/unittest2/test/test_assertions.py
+@@ -208,7 +208,7 @@ class TestLongMessage(unittest2.TestCase
+         # Error messages are multiline so not testing on full message
+         # assertTupleEqual and assertListEqual delegate to this method
+         self.assertMessages('assertSequenceEqual', ([], [None]),
+-                            ["\+ \[None\]$", "^oops$", r"\+ \[None\]$",
++                            [r"\+ \[None\]$", "^oops$", r"\+ \[None\]$",
+                              r"\+ \[None\] : oops$"])
+ 
+     def testAssertSetEqual(self):
+@@ -218,21 +218,21 @@ class TestLongMessage(unittest2.TestCase
+ 
+     def testAssertIn(self):
+         self.assertMessages('assertIn', (None, []),
+-                            ['^None not found in \[\]$', "^oops$",
+-                             '^None not found in \[\]$',
+-                             '^None not found in \[\] : oops$'])
++                            [r'^None not found in \[\]$', "^oops$",
++                             r'^None not found in \[\]$',
++                             r'^None not found in \[\] : oops$'])
+ 
+     def testAssertNotIn(self):
+         self.assertMessages('assertNotIn', (None, [None]),
+-                            ['^None unexpectedly found in \[None\]$', "^oops$",
+-                             '^None unexpectedly found in \[None\]$',
+-                             '^None unexpectedly found in \[None\] : oops$'])
++                            [r'^None unexpectedly found in \[None\]$', "^oops$",
++                             r'^None unexpectedly found in \[None\]$',
++                             r'^None unexpectedly found in \[None\] : oops$'])
+ 
+     def testAssertDictEqual(self):
+         self.assertMessages('assertDictEqual', ({}, {'key': 'value'}),
+                             [r"\+ \{'key': 'value'\}$", "^oops$",
+-                             "\+ \{'key': 'value'\}$",
+-                             "\+ \{'key': 'value'\} : oops$"])
++                             r"\+ \{'key': 'value'\}$",
++                             r"\+ \{'key': 'value'\} : oops$"])
+ 
+     def testAssertDictContainsSubset(self):
+         self.assertMessages('assertDictContainsSubset', ({'key': 'value'}, {}),
+--- unittest2-1.1.0.orig/unittest2/test/test_loader.py
++++ unittest2-1.1.0/unittest2/test/test_loader.py
+@@ -393,7 +393,7 @@ class Test_TestLoader(unittest2.TestCase
+         suite = loader.loadTestsFromName('abc () //')
+         error, test = self.check_deferred_error(loader, suite)
+         expected = "Failed to import test module: abc () //"
+-        expected_regex = "Failed to import test module: abc \(\) //"
++        expected_regex = r"Failed to import test module: abc \(\) //"
+         self.assertIn(
+             expected, error,
+             'missing error string in %r' % error)
+@@ -516,7 +516,7 @@ class Test_TestLoader(unittest2.TestCase
+         suite = loader.loadTestsFromName('abc () //', unittest)
+         error, test = self.check_deferred_error(loader, suite)
+         self.check_module_lookup_error(
+-            error, test, 'unittest2', 'abc () //', 'abc \(\) //')
++            error, test, 'unittest2', 'abc () //', r'abc \(\) //')
+ 
+     # "The method optionally resolves name relative to the given module"
+     #
+@@ -819,7 +819,7 @@ class Test_TestLoader(unittest2.TestCase
+         suite = loader.loadTestsFromNames(['abc () //'])
+         error, test = self.check_deferred_error(loader, list(suite)[0])
+         expected = "Failed to import test module: abc () //"
+-        expected_regex = "Failed to import test module: abc \(\) //"
++        expected_regex = r"Failed to import test module: abc \(\) //"
+         self.assertIn(
+             expected,  error,
+             'missing error string in %r' % error)
+@@ -926,7 +926,7 @@ class Test_TestLoader(unittest2.TestCase
+         suite = loader.loadTestsFromNames(['abc () //'], unittest)
+         error, test = self.check_deferred_error(loader, list(suite)[0])
+         self.check_module_lookup_error(
+-            error, test, 'unittest2', 'abc () //', 'abc \(\) //')
++            error, test, 'unittest2', 'abc () //', r'abc \(\) //')
+ 
+     # "The method optionally resolves name relative to the given module"
+     #
