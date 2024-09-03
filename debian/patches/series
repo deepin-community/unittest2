@@ -1,3 +1,6 @@
 drop-argparse.patch
 python3.5-support.patch
 python3.10-support.patch
+remove-traceback2-requirement.patch
+use-raw-strings-to-avoid-warnings.patch
+remove-six.patch

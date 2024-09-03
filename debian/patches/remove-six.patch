@@ -1,0 +1,350 @@
+From: Alexandre Detiste <tchet@debian.org>
+Subject: too little too late but maybe it will help find missing python3-six dependencies
+
+--- a/unittest2/case.py
++++ b/unittest2/case.py
+@@ -15,9 +15,6 @@
+ import unittest
+ import warnings
+ 
+-import six
+-from six.moves import range
+-
+ from unittest2 import result
+ from unittest2.util import (
+     safe_repr, safe_str, strclass,
+@@ -297,7 +294,7 @@
+ 
+     def __getitem__(self, key):
+         value = self._store[key]
+-        if isinstance(value, six.string_types):
++        if isinstance(value, str):
+             return getattr(self.testcase, value)
+         return value
+ 
+@@ -447,9 +444,7 @@
+         self.addTypeEqualityFunc(tuple, 'assertTupleEqual')
+         self.addTypeEqualityFunc(set, 'assertSetEqual')
+         self.addTypeEqualityFunc(frozenset, 'assertSetEqual')
+-        if six.PY2:
+-            self.addTypeEqualityFunc(str, 'assertMultiLineEqual')
+-        self.addTypeEqualityFunc(six.text_type, 'assertMultiLineEqual')
++        self.addTypeEqualityFunc(str, 'assertMultiLineEqual')
+ 
+     def addTypeEqualityFunc(self, typeobj, function):
+         """Add a type specific assertEqual style function to compare a type.
+@@ -1197,9 +1192,9 @@
+ 
+     def assertMultiLineEqual(self, first, second, msg=None):
+         """Assert that two multi-line strings are equal."""
+-        self.assertIsInstance(first, six.string_types, (
++        self.assertIsInstance(first, str, (
+                 'First argument is not a string'))
+-        self.assertIsInstance(second, six.string_types, (
++        self.assertIsInstance(second, str, (
+                 'Second argument is not a string'))
+ 
+         if first != second:
+@@ -1299,7 +1294,7 @@
+ 
+     def assertRegex(self, text, expected_regex, msg=None):
+         """Fail the test unless the text matches the regular expression."""
+-        if isinstance(expected_regex, six.string_types):
++        if isinstance(expected_regex, str):
+             expected_regex = re.compile(expected_regex)
+         if not expected_regex.search(text):
+             msg = msg or "Regex didn't match"
+@@ -1308,7 +1303,7 @@
+ 
+     def assertNotRegex(self, text, unexpected_regex, msg=None):
+         """Fail the test if the text matches the regular expression."""
+-        if isinstance(unexpected_regex, six.string_types):
++        if isinstance(unexpected_regex, str):
+             unexpected_regex = re.compile(unexpected_regex)
+         match = unexpected_regex.search(text)
+         if match:
+--- a/unittest2/compatibility.py
++++ b/unittest2/compatibility.py
+@@ -2,8 +2,6 @@
+ import os
+ import sys
+ 
+-import six
+-
+ try:
+     from functools import wraps
+ except ImportError:
+@@ -251,13 +249,5 @@
+ if sys.version_info[:2] < (3, 4):
+     collections.ChainMap = ChainMap
+ 
+-
+-# support raise_from on 3.x:
+-# submitted to six: https://bitbucket.org/gutworth/six/issue/102/raise-foo-from-bar-is-a-syntax-error-on-27
+-if sys.version_info[:2] > (3, 2):
+-    six.exec_("""def raise_from(value, from_value):
++def raise_from(value, from_value):
+     raise value from from_value
+-""")
+-else:
+-    def raise_from(value, from_value):
+-        raise value
+--- a/unittest2/main.py
++++ b/unittest2/main.py
+@@ -5,8 +5,6 @@
+ import os
+ import types
+ 
+-import six
+-
+ from unittest2 import loader, runner
+ try:
+     from unittest2.signals import installHandler
+@@ -67,7 +65,7 @@
+                  testLoader=loader.defaultTestLoader, exit=True,
+                  verbosity=1, failfast=None, catchbreak=None, buffer=None,
+                  tb_locals=False):
+-        if isinstance(module, six.string_types):
++        if isinstance(module, str):
+             self.module = __import__(module)
+             for part in module.split('.')[1:]:
+                 self.module = getattr(self.module, part)
+@@ -227,7 +225,7 @@
+             installHandler()
+         if self.testRunner is None:
+             self.testRunner = runner.TextTestRunner
+-        if isinstance(self.testRunner, six.class_types):
++        if isinstance(self.testRunner, type):
+             try:
+                 try:
+                     testRunner = self.testRunner(verbosity=self.verbosity,
+--- a/unittest2/runner.py
++++ b/unittest2/runner.py
+@@ -4,7 +4,7 @@
+ import time
+ import unittest
+ 
+-from six import u
++u = str
+ 
+ from unittest2 import result
+ 
+--- a/unittest2/suite.py
++++ b/unittest2/suite.py
+@@ -3,8 +3,6 @@
+ import sys
+ import unittest
+ 
+-import six
+-
+ from unittest2 import case, util
+ 
+ __unittest = True
+@@ -55,7 +53,7 @@
+         self._tests.append(test)
+ 
+     def addTests(self, tests):
+-        if isinstance(tests, six.string_types):
++        if isinstance(tests, str):
+             raise TypeError("tests must be an iterable of tests, not a string")
+         for test in tests:
+             self.addTest(test)
+--- a/unittest2/test/_test_unittest2_with.py
++++ b/unittest2/test/_test_unittest2_with.py
+@@ -4,8 +4,6 @@
+ import sys
+ import warnings
+ 
+-from six import u
+-
+ import unittest2
+ from unittest2.test.support import OldTestResult
+ from unittest2.compatibility import catch_warnings
+@@ -86,14 +84,14 @@
+             one = ''.join(chr(i) for i in range(255))
+             # this used to cause a UnicodeDecodeError constructing the failure msg
+             with self.assertRaises(self.failureException):
+-                self.assertDictContainsSubset({'foo': one}, {'foo': u('\uFFFD')})
++                self.assertDictContainsSubset({'foo': one}, {'foo': '\uFFFD'})
+ 
+     def test_formatMessage_unicode_error(self):
+         with catch_warnings(record=True):
+             # This causes a UnicodeWarning due to its craziness
+             one = ''.join(chr(i) for i in range(255))
+             # this used to cause a UnicodeDecodeError constructing msg
+-            self._formatMessage(one, u('\uFFFD'))
++            self._formatMessage(one, '\uFFFD')
+ 
+     def assertOldResultWarning(self, test, failures):
+         with self.assertWarns(RuntimeWarning):
+--- a/unittest2/test/support.py
++++ b/unittest2/test/support.py
+@@ -2,7 +2,7 @@
+ import sys
+ import warnings
+ 
+-from six.moves import StringIO
++from io import StringIO
+ 
+ import unittest2
+ 
+--- a/unittest2/test/test_break.py
++++ b/unittest2/test/test_break.py
+@@ -3,7 +3,7 @@
+ import sys
+ import weakref
+ 
+-from six.moves import StringIO
++from io import StringIO
+ 
+ try:
+     import signal
+--- a/unittest2/test/test_case.py
++++ b/unittest2/test/test_case.py
+@@ -8,8 +8,7 @@
+ import sys
+ import logging
+ 
+-import six
+-from six import b, u
++u = str
+ 
+ import unittest2
+ import unittest2 as unittest
+@@ -506,7 +505,7 @@
+             def runTest(self):
+                 pass
+ 
+-        self.assertIsInstance(Foo().id(), six.string_types)
++        self.assertIsInstance(Foo().id(), str)
+ 
+     # "If result is omitted or None, a temporary result object is created
+     # and used, but is not made available to the caller. As TestCase owns the
+@@ -935,7 +934,7 @@
+                 e = sys.exc_info()[1]
+                 # need to remove the first line of the error message
+                 error_str = str(e)
+-                if not isinstance(error_str, six.text_type):
++                if not isinstance(error_str, str):
+                     error_str = error_str.decode('utf8')
+                 error_lines = error_str.split(u('\n'), 1)
+                 if len(error_lines) > 1:
+--- a/unittest2/test/test_functiontestcase.py
++++ b/unittest2/test/test_functiontestcase.py
+@@ -1,5 +1,3 @@
+-import six
+-
+ import unittest2
+ from unittest2.test.support import LoggingResult
+ 
+@@ -125,7 +123,7 @@
+     def test_id(self):
+         test = unittest2.FunctionTestCase(lambda: None)
+ 
+-        self.assertIsInstance(test.id(), six.string_types)
++        self.assertIsInstance(test.id(), str)
+ 
+     # "Returns a one-line description of the test, or None if no description
+     # has been provided. The default implementation of this method returns
+--- a/unittest2/test/test_new_tests.py
++++ b/unittest2/test/test_new_tests.py
+@@ -1,6 +1,6 @@
+ import unittest
+ 
+-from six.moves import StringIO
++from io import StringIO
+ 
+ import unittest2
+ from unittest2.test.support import resultFactory
+--- a/unittest2/test/test_program.py
++++ b/unittest2/test/test_program.py
+@@ -1,4 +1,4 @@
+-from six.moves import StringIO
++from io import StringIO
+ 
+ import sys
+ import unittest2
+--- a/unittest2/test/test_result.py
++++ b/unittest2/test/test_result.py
+@@ -5,8 +5,7 @@
+ except ImportError:
+     import traceback2 as traceback
+ 
+-import six
+-from six.moves import StringIO
++from io import StringIO
+ 
+ import unittest2
+ import unittest2 as unittest
+@@ -195,7 +194,7 @@
+ 
+         test_case, formatted_exc = result.failures[0]
+         self.assertIs(test_case, test)
+-        self.assertIsInstance(formatted_exc, six.string_types)
++        self.assertIsInstance(formatted_exc, str)
+ 
+     # "addError(test, err)"
+     # ...
+@@ -243,7 +242,7 @@
+ 
+         test_case, formatted_exc = result.errors[0]
+         self.assertIs(test_case, test)
+-        self.assertIsInstance(formatted_exc, six.string_types)
++        self.assertIsInstance(formatted_exc, str)
+ 
+     def test_addError_locals(self):
+         class Foo(unittest.TestCase):
+--- a/unittest2/test/test_runner.py
++++ b/unittest2/test/test_runner.py
+@@ -2,8 +2,7 @@
+ import os
+ import pickle
+ 
+-from six.moves import StringIO
+-from six import u
++from io import StringIO
+ 
+ from unittest2.test.support import LoggingResult, OldTestResult
+ import unittest2
+@@ -252,7 +251,7 @@
+     def test_pickle_unpickle(self):
+         # Issue #7197: a TextTestRunner should be (un)pickleable. This is
+         # required by test_multiprocessing under Windows (in verbose mode).
+-        stream = StringIO(u("foo"))
++        stream = StringIO("foo")
+         runner = unittest2.TextTestRunner(stream)
+         for protocol in range(2, pickle.HIGHEST_PROTOCOL + 1):
+             s = pickle.dumps(runner, protocol=protocol)
+--- a/unittest2/test/test_setups.py
++++ b/unittest2/test/test_setups.py
+@@ -1,6 +1,6 @@
+ import sys
+ 
+-from six.moves import StringIO
++from io import StringIO
+ 
+ import unittest2
+ import unittest2 as unittest
+--- a/setup.py
++++ b/setup.py
+@@ -56,8 +56,7 @@
+ 
+ # Both install and setup requires - because we read VERSION from within the
+ # package, and the package also exports all the APIs.
+-# six for compat helpers
+-REQUIRES = ['six>=1.4'],
++REQUIRES = [],
+ 
+ params = dict(
+     name=NAME,
+--- a/unittest2/result.py
++++ b/unittest2/result.py
+@@ -3,7 +3,7 @@
+ import sys
+ import unittest
+ 
+-from six.moves import StringIO
++from io import StringIO
+ try:
+     import traceback
+ except ImportError:
